@@ -70,7 +70,6 @@
         <dependency>
             <groupId>it.unimi.dsi</groupId>
             <artifactId>fastutil</artifactId>
-             <version>6.2.2</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
