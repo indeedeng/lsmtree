@@ -29,6 +29,7 @@
     <modules>
         <module>lsmtree-core</module>
         <module>recordcache</module>
+        <module>recordcache-internal</module>
         <module>recordlog</module>
     </modules>
 
