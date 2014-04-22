@@ -7,7 +7,6 @@ import com.indeed.lsmtree.core.Store;
 import com.indeed.lsmtree.recordlog.RecordLogDirectory;
 
 /**
- * todo need better name because it's not a store itself
  * @author jchien
  */
 public class RecordLogStore<K, V> implements Closeable {

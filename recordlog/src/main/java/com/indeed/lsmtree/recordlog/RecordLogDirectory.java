@@ -121,11 +121,11 @@ public final class RecordLogDirectory<E> implements RecordFile<E> {
         }
 
         @Override
-        public long append(final E e) throws IOException {
+        public long append(final E entry) throws IOException {
             if (System.currentTimeMillis()-lastRollTime > rollFrequency) {
                 roll();
             }
-            final long writerAddress = currentWriter.append(e);
+            final long writerAddress = currentWriter.append(entry);
             if (writerAddress >= 1L<< segmentShift) throw new IOException("current writer has exceeded maximum size");
             return (((long)currentSegmentNum)<< segmentShift)+writerAddress;
         }

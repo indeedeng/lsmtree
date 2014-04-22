@@ -13,6 +13,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.joda.time.DateTime;
 
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -46,11 +47,17 @@ public class GenericRecordLogAppender<T> {
 
     private final ObjectMapper mapper;
 
-    public GenericRecordLogAppender(File file, Serializer<T> serializer, CompressionCodec codec, AtomicReference<Map<String, String>> metadataRef) throws IOException {
+    public GenericRecordLogAppender(File file,
+                                    Serializer<T> serializer,
+                                    CompressionCodec codec,
+                                    AtomicReference<Map<String, String>> metadataRef) throws IOException {
         this(file, serializer, codec, metadataRef, Long.MAX_VALUE);
     }
 
-    public GenericRecordLogAppender(File file, Serializer<T> serializer, CompressionCodec codec, AtomicReference<Map<String, String>> metadataRef,
+    public GenericRecordLogAppender(File file,
+                                    Serializer<T> serializer,
+                                    CompressionCodec codec,
+                                    AtomicReference<Map<String, String>> metadataRef,
                                     long rollFrequency) throws IOException {
         mapper = new ObjectMapper();
         mapper.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
@@ -117,7 +124,7 @@ public class GenericRecordLogAppender<T> {
         return lastPosition;
     }
 
-    public synchronized void flushWriter(Map<String, String> metadata) throws IOException {
+    public synchronized void flushWriter(@Nonnull Map<String, String> metadata) throws IOException {
         writer.roll();
         maxSegment = (int)(lastPosition >>> (64-RecordLogDirectory.DEFAULT_FILE_INDEX_BITS));
         metadata.put(LAST_POSITION_KEY, String.valueOf(lastPosition));

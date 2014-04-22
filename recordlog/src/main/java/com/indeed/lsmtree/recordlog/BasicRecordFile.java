@@ -152,9 +152,9 @@ public final class BasicRecordFile<E> implements RecordFile<E> {
         }
 
         @Override
-        public long append(final E e) throws IOException {
+        public long append(final E entry) throws IOException {
             UnsafeByteArrayOutputStream bytes = new UnsafeByteArrayOutputStream();
-            serializer.write(e, new DataOutputStream(bytes));
+            serializer.write(entry, new DataOutputStream(bytes));
             final long start = out.position();
             out.writeInt(bytes.size());
             final CRC32 checksum = new CRC32();

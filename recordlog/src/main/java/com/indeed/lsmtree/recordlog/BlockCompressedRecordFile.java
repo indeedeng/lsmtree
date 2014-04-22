@@ -184,12 +184,12 @@ public final class BlockCompressedRecordFile<E> implements RecordFile<E> {
             this.blockSize = blockSize;
         }
 
-        public long append(final E e) throws IOException {
+        public long append(final E entry) throws IOException {
             if ((currentBlockBytes.size() >= blockSize && numRecords > 0) || numRecords == lengthBuffer.length) {
                 flushBuffer();
             }
             final int start = currentBlockBytes.size();
-            serializer.write(e, currentBlockOut);
+            serializer.write(entry, currentBlockOut);
             final int length = (currentBlockBytes.size()-start);
             lengthBuffer[numRecords] = length;
             final long ret = blockAddress+numRecords;
