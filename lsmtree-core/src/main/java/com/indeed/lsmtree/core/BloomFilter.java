@@ -171,7 +171,6 @@ public final class BloomFilter {
         return hash;
     }
 
-    // todo RB says this is squall malloc
     public static final class MemoryManager implements Closeable {
 
         private static final AtomicInteger THREAD_NUMBERER = new AtomicInteger(0);
