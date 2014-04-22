@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>lsmtree-core</artifactId>
-    <name>indeed-lsmtree-core</name>
+    <name>lsmtree-core</name>
     <description>
         Core lsmtree functionality
     </description>
