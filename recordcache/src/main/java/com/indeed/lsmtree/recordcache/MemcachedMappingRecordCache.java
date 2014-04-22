@@ -191,8 +191,8 @@ public final class MemcachedMappingRecordCache<A, B, C, D> implements RecordCach
             }
         });
         final Iterator<Either<Exception,P2<A,B>>> streaming = baseCache.getStreaming(iterator, status != null ? status.primerProgress : null, status != null ? status.primerSkipped : null);
-        log.info("docstore lookup iterator initialized");
-        log.info("starting docstore lookups");
+        log.info("store lookup iterator initialized");
+        log.info("starting store lookups");
         while (streaming.hasNext()) {
             final Either<Exception, P2<A, B>> next = streaming.next();
             try {

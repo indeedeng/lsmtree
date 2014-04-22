@@ -257,7 +257,7 @@ public final class PersistentRecordCache<K, V> implements RecordCache<K, V> {
         Arrays.sort(addresses);
         log.info("sorting complete, allocating more memory");
         addressList = new LongArrayList(addresses);
-        log.info("allocation complete, initializing docstore lookup iterator");
+        log.info("allocation complete, initializing store lookup iterator");
         final BlockingQueue<Runnable> taskQueue = new ArrayBlockingQueue<Runnable>(100);
         final Iterator<List<Long>> iterable = Iterators.partition(addressList.iterator(), 1000);
         final ExecutorService primerThreads = new ThreadPoolExecutor(
@@ -266,7 +266,7 @@ public final class PersistentRecordCache<K, V> implements RecordCache<K, V> {
                 0L,
                 TimeUnit.MILLISECONDS,
                 taskQueue,
-                new NamedThreadFactory("docservice priming thread", true, log),
+                new NamedThreadFactory("store priming thread", true, log),
                 new RejectedExecutionHandler() {
                     @Override
                     public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
