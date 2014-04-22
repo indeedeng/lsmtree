@@ -4,8 +4,8 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.common.io.Closeables;
 import com.indeed.util.core.hash.MurmurHash;
+import com.indeed.util.core.io.Closeables2;
 import com.indeed.util.serialization.Serializer;
 import com.indeed.util.mmap.Memory;
 import com.indeed.util.mmap.NativeBuffer;
@@ -412,7 +412,7 @@ public final class BloomFilter {
         public void close() {
             if (mLock) physicalMemory.munlock(0, physicalMemory.memory().length());
             runCleaner.set(false);
-            Closeables.closeQuietly(physicalMemory);
+            Closeables2.closeQuietly(physicalMemory, log);
         }
 
         public final class AddressSpace implements Closeable {
@@ -613,7 +613,7 @@ public final class BloomFilter {
                             }
                         }
                     }
-                    Closeables.closeQuietly(raf);
+                    Closeables2.closeQuietly(raf, log);
                 }
             }
         }

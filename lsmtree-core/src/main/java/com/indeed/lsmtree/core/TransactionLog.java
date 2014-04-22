@@ -1,6 +1,6 @@
 package com.indeed.lsmtree.core;
 
-import com.google.common.io.Closeables;
+import com.google.common.io.Closer;
 import com.indeed.util.serialization.Serializer;
 import com.indeed.lsmtree.recordlog.BasicRecordFile;
 import com.indeed.lsmtree.recordlog.RecordFile;
@@ -69,8 +69,10 @@ public final class TransactionLog {
 
         @Override
         public void close() throws IOException {
-            Closeables.closeQuietly(recordFile);
-            Closeables.closeQuietly(reader);
+            final Closer closer = Closer.create();
+            closer.register(reader);
+            closer.register(recordFile);
+            closer.close();
         }
     }
 

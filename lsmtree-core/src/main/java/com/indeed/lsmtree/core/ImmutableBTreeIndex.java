@@ -3,10 +3,10 @@ package com.indeed.lsmtree.core;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.collect.AbstractIterator;
-import com.google.common.io.Closeables;
 import com.google.common.io.CountingOutputStream;
 import com.google.common.io.LittleEndianDataInputStream;
 import com.google.common.io.LittleEndianDataOutputStream;
+import com.indeed.util.core.io.Closeables2;
 import com.indeed.util.core.reference.SharedReference;
 import com.indeed.util.core.shell.PosixFileOperations;
 import com.indeed.util.io.BufferedFileDataOutputStream;
@@ -245,7 +245,7 @@ public final class ImmutableBTreeIndex {
         @Override
         public boolean hasNext() {
             if (i < tmpCount) return true;
-            Closeables.closeQuietly(in);
+            Closeables2.closeQuietly(in, log);
             return false;
         }
 
@@ -317,7 +317,7 @@ public final class ImmutableBTreeIndex {
                 rootLevelStartAddress = header.rootLevelStartAddress;
                 if (mlockFiles) buffer.mlock(0, buffer.memory().length());
             } catch (Throwable t) {
-                Closeables.closeQuietly(buffer);
+                Closeables2.closeQuietly(buffer, log);
                 Throwables.propagateIfInstanceOf(t, IOException.class);
                 throw Throwables.propagate(t);
             }

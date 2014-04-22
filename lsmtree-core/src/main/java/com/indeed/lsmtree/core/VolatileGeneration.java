@@ -3,7 +3,7 @@ package com.indeed.lsmtree.core;
 import com.google.common.collect.AbstractIterator;
 import com.google.common.collect.Ordering;
 import com.google.common.io.ByteStreams;
-import com.google.common.io.Closeables;
+import com.indeed.util.core.io.Closeables2;
 import com.indeed.util.core.reference.SharedReference;
 import com.indeed.util.io.BufferedFileDataOutputStream;
 import com.indeed.util.serialization.Serializer;
@@ -246,7 +246,7 @@ public final class VolatileGeneration<K, V> implements Generation<K,V> {
     }
 
     public void closeWriter() throws IOException {
-        Closeables.closeQuietly(transactionLog);
+        Closeables2.closeQuietly(transactionLog, log);
     }
 
     @Override
