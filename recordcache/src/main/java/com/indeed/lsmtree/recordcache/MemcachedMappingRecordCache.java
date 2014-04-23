@@ -69,9 +69,13 @@ public final class MemcachedMappingRecordCache<A, B, C, D> implements RecordCach
                 count.incrementAndGet();
                 if (count.get() % 1000 == 0) {
                     final int puts = memcachedPuts.get();
-                    if (puts > 0) log.debug("avg memcached put time: " + memcachedPutTime.get() / puts / 1000d + " us");
+                    if (log.isDebugEnabled() && puts > 0) {
+                        log.debug("avg memcached put time: " + memcachedPutTime.get() / puts / 1000d + " us");
+                    }
                     final int deletes = memcachedDeletes.get();
-                    if (deletes > 0) log.debug("avg memcached delete time: " + memcachedDeleteTime.get() / deletes / 1000d + " us");
+                    if (log.isDebugEnabled() && deletes > 0) {
+                        log.debug("avg memcached delete time: " + memcachedDeleteTime.get() / deletes / 1000d + " us");
+                    }
                 }
                 if (op.getClass() == Put.class) {
                     final Put<A, B> put = (Put)op;
