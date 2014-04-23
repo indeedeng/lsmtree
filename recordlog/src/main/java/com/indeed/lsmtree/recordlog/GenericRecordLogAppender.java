@@ -14,6 +14,7 @@ import org.codehaus.jackson.map.SerializationConfig;
 import org.joda.time.DateTime;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -54,10 +55,21 @@ public class GenericRecordLogAppender<T> {
         this(file, serializer, codec, metadataRef, Long.MAX_VALUE);
     }
 
-    public GenericRecordLogAppender(File file,
-                                    Serializer<T> serializer,
-                                    CompressionCodec codec,
-                                    AtomicReference<Map<String, String>> metadataRef,
+    /**
+     * @param file              root directory for record logs
+     * @param serializer        serializer
+     * @param codec             compression codec
+     * @param metadataRef       if non null, this will contain a reference to metadata after construction if it existed
+     * @param rollFrequency     how frequently new record files should be created in milliseconds, but only if there
+     *                          is a new write. If set to MAX_LONG, new record files will only be created when
+     *                          {@link #flushWriter(java.util.Map)} is called
+     *
+     * @throws IOException      if an I/O error occurs
+     */
+    public GenericRecordLogAppender(@Nonnull File file,
+                                    @Nonnull Serializer<T> serializer,
+                                    @Nonnull CompressionCodec codec,
+                                    @Nullable AtomicReference<Map<String, String>> metadataRef,
                                     long rollFrequency) throws IOException {
         mapper = new ObjectMapper();
         mapper.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
@@ -115,15 +127,34 @@ public class GenericRecordLogAppender<T> {
         return null;
     }
 
+    /**
+     * @param segment   segment number
+     * @return          a file pointing at the segment
+     */
     public File getSegmentPath(int segment) {
         return RecordLogDirectory.getSegmentPath(file, segment);
     }
 
+    /**
+     * Writes an entry to the record file. This write is not guaranteed to be persisted
+     * unless {@link #flushWriter(java.util.Map)} is called.
+     *
+     * @param op            operation to write
+     * @return              address operation was written to
+     * @throws IOException  if an I/O error occurs
+     */
     protected long writeOperation(final T op) throws IOException {
         lastPosition = writer.append(op);
         return lastPosition;
     }
 
+    /**
+     * Creates a new segment file and flushes buffered writes to disk.
+     * Provided metadata is written to record_log_directory_root/metadata.json
+     *
+     * @param metadata       a mutable map of metadata to be written, may be empty.
+     * @throws IOException   if an I/O error occurs
+     */
     public synchronized void flushWriter(@Nonnull Map<String, String> metadata) throws IOException {
         writer.roll();
         maxSegment = (int)(lastPosition >>> (64-RecordLogDirectory.DEFAULT_FILE_INDEX_BITS));
@@ -134,7 +165,13 @@ public class GenericRecordLogAppender<T> {
         writeStringToFile(maxSegmentPath, String.valueOf(maxSegment));
     }
 
-    public static long readLongFromFile(File f, long defaultVal) throws IOException {
+    /**
+     * @param f             file that stores a single long as a UTF-8 string
+     * @param defaultVal    value to return if file does not exist
+     * @return              long value stored in file, or default value if it does not exist
+     * @throws IOException  if an I/O error occurs
+     */
+    public static long readLongFromFile(@Nonnull File f, long defaultVal) throws IOException {
         if (!f.exists()) {
             return defaultVal;
         } else {
@@ -147,6 +184,13 @@ public class GenericRecordLogAppender<T> {
         }
     }
 
+    /**
+     * Writes a string to a file, overwriting it if it exists.
+     *
+     * @param f             file to write
+     * @param str           value to store
+     * @throws IOException  if an I/O error occurs
+     */
     public static void writeStringToFile(File f, String str) throws IOException {
         File nextPath = new File(f.getParentFile(), f.getName()+".next");
         BufferedFileDataOutputStream out = new BufferedFileDataOutputStream(nextPath);
