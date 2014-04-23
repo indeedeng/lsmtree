@@ -229,7 +229,7 @@ public final class PersistentRecordCache<K, V> implements RecordCache<K, V> {
     }
 
     public Iterator<Either<Exception, P2<K,V>>> getStreaming(Iterator<K> keys, AtomicInteger progress, AtomicInteger skipped) {
-        log.info("starting memcached lookups");
+        log.info("starting store lookups");
         LongArrayList addressList = new LongArrayList();
         int notFound = 0;
         while (keys.hasNext()) {
@@ -249,7 +249,7 @@ public final class PersistentRecordCache<K, V> implements RecordCache<K, V> {
         }
         if (progress != null) progress.addAndGet(notFound);
         if (skipped != null) skipped.addAndGet(notFound);
-        log.info("memcached lookups complete");
+        log.info("store lookups complete");
         log.info("about to allocate a lot of memory");
         final long[] addresses = new long[addressList.size()];
         addressList.toLongArray(addresses);
