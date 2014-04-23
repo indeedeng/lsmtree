@@ -61,6 +61,14 @@ public class GenericRecordLogDirectoryPoller<T> implements Runnable, Closeable {
         this(recordLogDirectory, checkpointer, loop, gc, false);
     }
 
+    /**
+     * @param recordLogDirectory    record log directory
+     * @param checkpointer          checkpointer used to track last known good position
+     * @param loop                  if true, continually check for new record logs
+     * @param gc                    if true, delete record logs up to (excluding) the last processed record log
+     * @param skipFirst             if true, skip the first entry, which will be the last entry added from previous run
+     * @throws IOException
+     */
     public GenericRecordLogDirectoryPoller(
             RecordLogDirectory<T> recordLogDirectory,
             Checkpointer<Long> checkpointer,
@@ -77,15 +85,29 @@ public class GenericRecordLogDirectoryPoller<T> implements Runnable, Closeable {
         lastPosition = checkpointer.getCheckpoint();
     }
 
+    /**
+     * Register callbacks that should be called for each entry in a {@link RecordFile}.
+     *
+     * @param functions
+     */
     public void registerFunctions(Functions<T> functions) {
         functionsList.add(functions);
     }
 
+    /**
+     * Creates a background thread and polls for new record logs.
+     */
     public void start() {
         pollerThread = new Thread(this);
         pollerThread.start();
     }
 
+    /**
+     * Polls for new record logs.
+     *
+     * This will block and should not be called directly unless loop was set to false.
+     * If setting loop to true use {@link #start} instead.
+     */
     @Override
     public void run() {
         do {
@@ -201,6 +223,11 @@ public class GenericRecordLogDirectoryPoller<T> implements Runnable, Closeable {
         return recordLogDirectory.getMaxSegmentNum();
     }
 
+    /**
+     * Close the poller, shutting down the background thread if necessary.
+     *
+     * @throws IOException
+     */
     @Override
     public void close() throws IOException {
         isClosed.set(true);
@@ -212,6 +239,9 @@ public class GenericRecordLogDirectoryPoller<T> implements Runnable, Closeable {
         }
     }
 
+    /**
+     * @return  true if a background poller thread is running
+     */
     public boolean isAlive() {
         return pollerThread.isAlive();
     }
