@@ -216,7 +216,7 @@ public final class MemcachedMappingRecordCache<A, B, C, D> implements RecordCach
                 }
             }
         }
-        log.info("docstore lookups complete");
+        log.info("store lookups complete");
     }
 
     @Override
