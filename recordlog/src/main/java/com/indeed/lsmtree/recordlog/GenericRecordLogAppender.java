@@ -61,7 +61,7 @@ public class GenericRecordLogAppender<T> {
      * @param codec             compression codec
      * @param metadataRef       if non null, this will contain a reference to metadata after construction if it existed
      * @param rollFrequency     how frequently new record files should be created in milliseconds, but only if there
-     *                          is a new write. If set to MAX_LONG, new record files will only be created when
+     *                          is a new write. If set to {@link Long.MAX_VALUE}, new record files will only be created when
      *                          {@link #flushWriter(java.util.Map)} is called
      *
      * @throws IOException      if an I/O error occurs
