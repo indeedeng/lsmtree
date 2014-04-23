@@ -1,4 +1,4 @@
-recordlog
+# recordlog
 
 ## About
 Recordlog is a library for reading and writing data to record logs. Many records are stored together in a `RecordFile`.
