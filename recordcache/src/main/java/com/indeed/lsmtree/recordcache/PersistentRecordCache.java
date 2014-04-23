@@ -249,15 +249,12 @@ public final class PersistentRecordCache<K, V> implements RecordCache<K, V> {
         }
         if (progress != null) progress.addAndGet(notFound);
         if (skipped != null) skipped.addAndGet(notFound);
-        log.info("store lookups complete");
-        log.info("about to allocate a lot of memory");
-        final long[] addresses = new long[addressList.size()];
-        addressList.toLongArray(addresses);
-        log.info("allocations complete, sorting");
-        Arrays.sort(addresses);
-        log.info("sorting complete, allocating more memory");
-        addressList = new LongArrayList(addresses);
-        log.info("allocation complete, initializing store lookup iterator");
+        log.info("store lookups complete, sorting addresses");
+
+        final long[] addresses = addressList.elements();
+        Arrays.sort(addresses, 0, addressList.size());
+
+        log.info("initializing store lookup iterator");
         final BlockingQueue<Runnable> taskQueue = new ArrayBlockingQueue<Runnable>(100);
         final Iterator<List<Long>> iterable = Iterators.partition(addressList.iterator(), 1000);
         final ExecutorService primerThreads = new ThreadPoolExecutor(
