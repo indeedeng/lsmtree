@@ -102,6 +102,24 @@ public final class Store<K, V> implements Closeable {
 
     private final BloomFilter.MemoryManager memoryManager;
 
+    /**
+     * Use {@link StoreBuilder} to create a store.
+     *
+     * @param root                          root lsm tree index directory
+     * @param keySerializer                 key serializer
+     * @param valueSerializer               value serializer
+     * @param comparator                    key comparator
+     * @param maxVolatileGenerationSize     max size of volatile generation in bytes before a compaction should occur
+     * @param storageType                   storage type
+     * @param codec                         compression codec
+     * @param readOnly                      open lsm tree in read only mode
+     * @param dedicatedPartition            true if lsm tree is on a dedicated partition
+     * @param reservedSpaceThreshold        disk space in bytes that must be available after compactions
+     * @param mlockFiles                    mlock files if true
+     * @param bloomFilterMemory             memory allocated to bloom filter, in bytes
+     * @param mlockBloomFilters             mlock bloom filters if true
+     * @throws IOException
+     */
     Store(
             File root,
             Serializer<K> keySerializer,
@@ -341,6 +359,13 @@ public final class Store<K, V> implements Closeable {
         }
     };
 
+    /**
+     * Return the value associated with key, or null if no mapping exists.
+     *
+     * @param key           lookup key
+     * @return              value for key, or null if key does not exist
+     * @throws IOException  if an I/O error occurs
+     */
     public @Nullable V get(K key) throws IOException {
         return doWithState(get, key);
     }
@@ -362,6 +387,13 @@ public final class Store<K, V> implements Closeable {
         }
     };
 
+    /**
+     * Returns true if the key exists in the store.
+     *
+     * @param key           lookup key
+     * @return              true if key exists in store
+     * @throws IOException  if an I/O error occurs
+     */
     public boolean containsKey(K key) throws IOException {
         return doWithState(containsKey, key);
     }
@@ -388,6 +420,13 @@ public final class Store<K, V> implements Closeable {
         }
     };
 
+    /**
+     * Writes a key/value pair to store, overwriting any existing entry for the key.
+     *
+     * @param key           key
+     * @param value         value
+     * @throws IOException  if an I/O exception occurs
+     */
     public void put(K key, V value) throws IOException {
         doUntilSuccessful(put, new Entry<K, V>(key, value));
     }
@@ -414,6 +453,12 @@ public final class Store<K, V> implements Closeable {
         }
     };
 
+    /**
+     * Removes the mapping for a key.
+     *
+     * @param key           key to delete
+     * @throws IOException
+     */
     public void delete(K key) throws IOException {
         doUntilSuccessful(delete, key);
     }
@@ -458,46 +503,110 @@ public final class Store<K, V> implements Closeable {
         };
     }
 
+    /**
+     * @param key           lookup key
+     * @return              the first entry with key strictly less than specified key, or null if no such entry exists
+     * @throws IOException  if an I/O error occurs
+     */
     public @Nullable Entry<K,V> lower(final K key) throws IOException {
         return doWithState(neighbor(true, false), key);
     }
 
+    /**
+     * @param key           lookup key
+     * @return              the first entry with key less than or equal to specified key, or null if no such entry exists
+     * @throws IOException  if an I/O error occurs
+     */
     public @Nullable Entry<K,V> floor(K key) throws IOException {
         return doWithState(neighbor(true, true), key);
     }
 
+    /**
+     * @param key           lookup key
+     * @return              the first entry with key greater than or equal to specified key, or null if no such entry exists
+     * @throws IOException  if an I/O error occurs
+     */
     public @Nullable Entry<K,V> ceil(K key) throws IOException {
         return doWithState(neighbor(false, true), key);
     }
 
+    /**
+     * @param key           lookup key
+     * @return              the first entry with key strictly greater than specified key, or null if no such entry exists
+     * @throws IOException  if an I/O error occurs
+     */
     public @Nullable Entry<K,V> higher(K key) throws IOException {
         return doWithState(neighbor(false, false), key);
     }
 
+    /**
+     * @return              the entry with lowest key, or null if no such entry exists
+     * @throws IOException  if an I/O error occurs
+     */
     public @Nullable Entry<K,V> first() throws IOException {
         return doWithState(neighbor(false, false), null);
     }
 
+    /**
+     * @return              the entry with highest key, or null if no such entry exists
+     * @throws IOException  if an I/O error occurs
+     */
     public @Nullable Entry<K,V> last() throws IOException {
         return doWithState(neighbor(true, false), null);
     }
 
+    /**
+     * @return              a sorted iterator over all entries in the store
+     * @throws IOException  if an I/O error occurs
+     */
     public Iterator<Entry<K,V>> iterator() throws IOException {
         return iterator(null, false, false);
     }
 
+    /**
+     * Returns a sorted iterator over entries greater than or equal to a specified key.
+     * Whether or not keys must be strictly greater is controllable by an inclusive argument.
+     *
+     * @param start         return entries only greater than this key
+     * @param inclusive     if true, include entry if its key is start
+     * @return              a sorted iterator over entries fitting the arguments
+     * @throws IOException  if an I/O error occurs
+     */
     public Iterator<Entry<K,V>> iterator(final K start, final boolean inclusive) throws IOException {
         return iterator(start, inclusive, false);
     }
 
+    /**
+     * @return              a reverse sorted iterator over all entries in the store
+     * @throws IOException  if an I/O error occurs
+     */
     public Iterator<Entry<K,V>> reverseIterator() throws IOException {
         return iterator(null, false, true);
     }
 
+    /**
+     * Returns a reverse sorted iterator over entries less than or equal to a specified key.
+     * Whether or not keys must be strictly less is controllable by an inclusive argument.
+     *
+     * @param start         return entries only less than this key
+     * @param inclusive     if true, include entry if its key is start
+     * @return              a reverse sorted iterator over entries fitting the arguments
+     * @throws IOException  if an I/O error occurs
+     */
     public Iterator<Entry<K,V>> reverseIterator(final K start, final boolean inclusive) throws IOException {
         return iterator(start, inclusive, true);
     }
-    
+
+    /**
+     * Return a sorted iterator over entries starting at a specified key. Whether the iterator is sorted in ascending or
+     * descending order and whether the entries need to be strictly greater than a specified key is controllable by arguments.
+     *
+     * @param start         comparison key
+     * @param inclusive     if true, include entries with the key
+     * @param reverse       if true, entries will be iterated over in descending order
+     * @return              sorted iterator over entries
+     * @throws IOException  if an I/O error occurs
+     */
     public Iterator<Entry<K,V>> iterator(final @Nullable K start, final boolean inclusive, final boolean reverse) throws IOException {
         return new Iterator<Entry<K, V>>() {
             
@@ -558,6 +667,14 @@ public final class Store<K, V> implements Closeable {
         };
     }
 
+    /**
+     * Uses specified processor to iterate over entries in the store, returning some value determined by the processor.
+     *
+     * @param processor     processor
+     * @param <A>           return type
+     * @return              value determined by processor
+     * @throws IOException
+     */
     public <A> A process(Processor<Entry<K,V>, A> processor) throws IOException {
         return doWithState(this.<A>process(), P.p(processor, (K)null, Boolean.FALSE, Boolean.FALSE));
     }
@@ -636,14 +753,23 @@ public final class Store<K, V> implements Closeable {
         }
     }
 
+    /**
+     * @return  key comparator
+     */
     public Comparator<K> getComparator() {
         return comparator;
     }
 
+    /**
+     * @return  key serializer
+     */
     public Serializer<K> getKeySerializer() {
         return keySerializer;
     }
 
+    /**
+     * @return  value serializer
+     */
     public Serializer<V> getValueSerializer() {
         return valueSerializer;
     }
@@ -706,6 +832,11 @@ public final class Store<K, V> implements Closeable {
         }
     }
 
+    /**
+     * Close the store
+     *
+     * @throws IOException  if an I/O error occurs
+     */
     @Override
     public void close() throws IOException {
         if (closed) return;
@@ -720,6 +851,11 @@ public final class Store<K, V> implements Closeable {
         }
     }
 
+    /**
+     * Flushes volatile generation to disk.
+     *
+     * @throws IOException  if an I/O error occurs
+     */
     public void sync() throws IOException {
         final SharedReference<GenerationState<K, V>> localState = generationState.getCopy();
         try {
@@ -737,6 +873,11 @@ public final class Store<K, V> implements Closeable {
         }
     }
 
+    /**
+     * Blocks until compactions are complete.
+     *
+     * @throws InterruptedException
+     */
     public void waitForCompactions() throws InterruptedException {
         compactor.waitForCompletion();
     }
@@ -756,6 +897,10 @@ public final class Store<K, V> implements Closeable {
         }
     };
 
+    /**
+     * @return              active space in use by all generations, in bytes
+     * @throws IOException  if an I/O error occurs
+     */
     public long getActiveSpaceUsage() throws IOException {
         return doWithState(getActiveSpaceUsage, null);
     }
@@ -771,14 +916,26 @@ public final class Store<K, V> implements Closeable {
         }
     };
 
+    /**
+     * @return              total space in use, in bytes
+     * @throws IOException  if an I/O error occurs
+     */
     public long getTotalSpaceUsage() throws IOException {
         return doWithState(getTotalSpaceUsage, null);
     }
 
+    /**
+     * @return              space reserved for compaction, in bytes
+     * @throws IOException
+     */
     public long getReservedSpaceUsage() {
         return reservedCompactionSpace.get();
     }
 
+    /**
+     * @return              remaining free space in bytes, excluding any space reserved for compaction and the reserved space threshold
+     * @throws IOException
+     */
     public long getFreeSpace() throws IOException {
         return getFreeSpace(getReservedSpaceUsage() + reservedSpaceThreshold);
     }
@@ -1079,7 +1236,13 @@ public final class Store<K, V> implements Closeable {
             }
         }
     }
-    
+
+    /**
+     * A key/value pair.
+     *
+     * @param <K>   key type
+     * @param <V>   value type
+     */
     public static final class Entry<K,V> {
         private final K key;
         private final V value;
