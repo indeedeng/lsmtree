@@ -78,9 +78,13 @@ public final class StandalonePersistentRecordCache<K, V> implements RecordCache<
                 count.incrementAndGet();
                 if (count.get() % 1000 == 0) {
                     final int puts = indexPuts.get();
-                    if (puts > 0) log.debug("avg index put time: " + indexPutTime.get() / puts / 1000d + " us");
+                    if (log.isDebugEnabled() && puts > 0) {
+                        log.debug("avg index put time: " + indexPutTime.get() / puts / 1000d + " us");
+                    }
                     final int deletes = indexDeletes.get();
-                    if (deletes > 0) log.debug("avg index delete time: " + indexDeleteTime.get() / deletes / 1000d + " us");
+                    if (log.isDebugEnabled() && deletes > 0) {
+                        log.debug("avg index delete time: " + indexDeleteTime.get() / deletes / 1000d + " us");
+                    }
                 }
 
                 if (op.getClass() == Put.class) {
