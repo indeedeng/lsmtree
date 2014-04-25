@@ -173,7 +173,7 @@ public final class StandalonePersistentRecordCache<K, V> implements RecordCache<
     }
 
     public Iterator<Either<Exception, P2<K,V>>> getStreaming(Iterator<K> keys, AtomicInteger progress, AtomicInteger skipped) {
-        log.info("starting memcached lookups");
+        log.info("starting store lookups");
         final List<Either<Exception, P2<K,V>>> ret = Lists.newArrayList();
         int notFound = 0;
         while (keys.hasNext()) {
@@ -193,7 +193,7 @@ public final class StandalonePersistentRecordCache<K, V> implements RecordCache<
         }
         if (progress != null) progress.addAndGet(notFound);
         if (skipped != null) skipped.addAndGet(notFound);
-        log.info("memcached lookups complete");
+        log.info("store lookups complete");
 
         return ret.iterator();
     }
