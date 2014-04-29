@@ -550,7 +550,7 @@ public final class RecordLogDirectory<E> implements RecordFile<E> {
         if (path.exists()) {
             for (File f : path.listFiles()) {
                 final String name = f.getName();
-                if (name.matches("\\d+") && f.isDirectory()) {
+                if (name.matches("\\d+") && f.isDirectory() && f.list().length > 0) {
                     final int dirNum = Integer.parseInt(name);
                     if (dirNum < minDir) minDir = dirNum;
                 } else if (name.matches("\\d+\\.rec")) {
