@@ -63,6 +63,14 @@ public final class PersistentRecordCache<K, V> implements RecordCache<K, V> {
 
     private final Comparator<K> comparator;
 
+    /**
+     * Use {@link com.indeed.lsmtree.recordcache.PersistentRecordCache.Builder#build()} to instantiate.
+     *
+     * @param index                 lsm tree
+     * @param recordLogDirectory    record log directory
+     * @param checkpointDir         checkpoint directory
+     * @throws IOException          thrown if an I/O error occurs
+     */
     private PersistentRecordCache(
             final Store<K, Long> index,
             final RecordLogDirectory<Operation> recordLogDirectory,
