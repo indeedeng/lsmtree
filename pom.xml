@@ -7,7 +7,6 @@
         <version>7</version>
     </parent>
 
-    <groupId>com.indeed</groupId>
     <artifactId>lsmtree-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -79,7 +78,7 @@
 
         <!-- releases of our own projects to use -->
         <!-- these should only be SNAPSHOTs when no release is available -->
-        <indeed-util.version>1.0.6-SNAPSHOT</indeed-util.version>
+        <indeed-util.version>1.0.9-SNAPSHOT</indeed-util.version>
         <google-guava.version>16.0.1</google-guava.version>
         <fastutil.version>6.2.2</fastutil.version>
     </properties>
