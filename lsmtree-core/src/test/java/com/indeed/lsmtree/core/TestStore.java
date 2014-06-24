@@ -24,7 +24,7 @@ public final class TestStore extends TestCase {
 
     private static final Logger log = Logger.getLogger(TestStore.class);
 
-    private static final int SMALL_TREE_SIZE = 1000000;
+    private static final int SMALL_TREE_SIZE = 10000;
     private static final int LARGE_TREE_SIZE = 10000000;
 
     File tmpDir;

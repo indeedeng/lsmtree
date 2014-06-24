@@ -27,7 +27,7 @@ public final class TestImmutableBTreeIndex extends TestCase {
 
     private static final Logger log = Logger.getLogger(TestImmutableBTreeIndex.class);
 
-    private static final int SMALL_TREE_SIZE = 100000;
+    private static final int SMALL_TREE_SIZE = 1000;
     private static final int LARGE_TREE_SIZE = 100000000;
 
     File tmpDir;
