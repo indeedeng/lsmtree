@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.indeed</groupId>
         <artifactId>oss-parent</artifactId>
-        <version>7</version>
+        <version>10-SNAPSHOT</version>
     </parent>
 
     <artifactId>lsmtree-parent</artifactId>
@@ -51,6 +51,11 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>util-io</artifactId>
+                <version>${indeed-util.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>util-serialization</artifactId>
                 <version>${indeed-util.version}</version>
             </dependency>
@@ -78,8 +83,8 @@
 
         <!-- releases of our own projects to use -->
         <!-- these should only be SNAPSHOTs when no release is available -->
-        <indeed-util.version>1.0.9-SNAPSHOT</indeed-util.version>
+        <indeed-util.version>[1.0.9-SNAPSHOT,)</indeed-util.version>
         <google-guava.version>16.0.1</google-guava.version>
-        <fastutil.version>6.2.2</fastutil.version>
+        <fastutil.version>6.5.15</fastutil.version>
     </properties>
 </project>

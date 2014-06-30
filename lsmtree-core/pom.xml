@@ -50,7 +50,6 @@
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>commons-collections</groupId>
@@ -65,7 +64,6 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>1.4</version>
         </dependency>
         <dependency>
             <groupId>it.unimi.dsi</groupId>
