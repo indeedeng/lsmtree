@@ -42,6 +42,8 @@ block: [block size (int)][block checksum (int)][num records (int)][entry length 
 
 Metadata is arbitrary bytes that can be written as part of the record log. When using RecordLogAppender (see lsmtree-recordcache) this is unused and metadata is written to a separate file.
 
+Block size is the byte length of the compressed portion of the block.
+
 Checksum is an Adler-32 checksum of the compressed portion of the block.
 
 Each entry length is a variable-length integer, representing the byte length of the corresponding entry.
