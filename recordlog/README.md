@@ -49,7 +49,7 @@ Padding is used to align the start of block positions such that the address can 
 
 Addresses are represented by 64-bit values.
 
-CompressedBlockRecordFile address scheme (not written as a RecordLogDirectory):
+BlockCompressedRecordFile address scheme (not written as a RecordLogDirectory):
 ```
 [block address: 54 bits][record index: 10 bits]
 ```
