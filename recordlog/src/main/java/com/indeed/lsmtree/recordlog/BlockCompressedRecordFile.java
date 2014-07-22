@@ -365,7 +365,7 @@ public final class BlockCompressedRecordFile<E> implements RecordFile<E> {
             }
             BlockCacheEntry block = currentBlock.some();
             if (currentRecord == block.size()) {
-                blockAddress = block.getNextBlockStartAdress();
+                blockAddress = block.getNextBlockStartAddress();
                 currentBlock = blockCache.get(blockAddress).get();
                 currentRecord = 0;
                 if (currentBlock.isNone()) {
@@ -482,12 +482,12 @@ public final class BlockCompressedRecordFile<E> implements RecordFile<E> {
     private static final class BlockCacheEntry {
         private final int[] recordOffsets;
         private final Memory block;
-        private final long nextBlockStartAdress;
+        private final long nextBlockStartAddress;
 
-        public BlockCacheEntry(final int[] recordOffsets, final Memory block, final long nextBlockStartAdress) {
+        public BlockCacheEntry(final int[] recordOffsets, final Memory block, final long nextBlockStartAddress) {
             this.recordOffsets = recordOffsets;
             this.block = block;
-            this.nextBlockStartAdress = nextBlockStartAdress;
+            this.nextBlockStartAddress = nextBlockStartAddress;
         }
 
         public int size() {
@@ -499,8 +499,8 @@ public final class BlockCompressedRecordFile<E> implements RecordFile<E> {
             return block.slice(recordOffsets[index], length);
         }
 
-        public long getNextBlockStartAdress() {
-            return nextBlockStartAdress;
+        public long getNextBlockStartAddress() {
+            return nextBlockStartAddress;
         }
     }
 
