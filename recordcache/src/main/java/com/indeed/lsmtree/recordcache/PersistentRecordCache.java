@@ -330,7 +330,11 @@ public final class PersistentRecordCache<K, V> implements RecordCache<K, V> {
                         @Override
                         protected void done() {
                             try {
-                                completionQueue.put(get());
+                                final List<Either<Exception, P2<K, V>>> results = get();
+                                if (progress != null) {
+                                    progress.addAndGet(results.size());
+                                }
+                                completionQueue.put(results);
                             } catch (InterruptedException e) {
                                 log.error("error", e);
                                 throw new RuntimeException(e);
