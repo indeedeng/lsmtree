@@ -34,21 +34,30 @@ There are three implementations of `RecordFile`.
 
 ## CompressedBlockRecordFile file format
 ```
-record log: [block]*[MAX_INT (int)][metadata][metadata length][total size]
+record log: [block]*[MAX_INT (int)][metadata][metadata length (int)][total size]
 
-block: [block size (int)][checksum (int)][num records (int)][entry length (vints)]*[entry]*[padding]
-                                         |----------------- compressed -------------------|
+block: [block size (int)][block checksum (int)][num records (int)][entry length (vint)]*[entry]*[padding]
+                                               |----------------- compressed ------------------|
 ```
+
+Metadata is arbitrary bytes that can be written as part of the record log. When using RecordLogAppender (see lsmtree-recordcache) this is unused and metadata is written to a separate file.
+Checksum is an Adler-32 checksum of the compressed portion of the block.
+Each entry length is a variable-length integer, representing the byte length of the corresponding entry.
+Padding is used to align the start of block positions such that the address can be represented with fewer bits later.
 
 ## Address scheme
 
-CompressedBlockRecordFile (not written as a RecordLogDirectory):
+Addresses are represented by 64-bit values.
+
+CompressedBlockRecordFile address scheme (not written as a RecordLogDirectory):
 ```
 [block address: 54 bits][record index: 10 bits]
 ```
 
-Address scheme for RecordLogDirectory:
+RecordLogDirectory address scheme:
 ```
-[segment number: 28 bits][block address: 36 bits][record index: 10 bits]
+[segment number: 28 bits][block address: 26 bits][record index: 10 bits]
 ```
+
+In both of these schemes the block address is implicitly padBits (default 6) longer. For RecordLogDirectory record logs, this means the block address is 32 bits, but the last 6 bits must be zeroes. Thus the last block address can start at 0xffffffc0 and the max record file size is approximately 4 GB.
 
