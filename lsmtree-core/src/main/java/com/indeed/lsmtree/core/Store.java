@@ -833,7 +833,7 @@ public final class Store<K, V> implements Closeable {
     }
 
     /**
-     * Close the store
+     * Close the store, clean up lock files.
      *
      * @throws IOException  if an I/O error occurs
      */
