@@ -32,3 +32,23 @@ There are three implementations of `RecordFile`.
 
 `RecordLogDirectory` is a `RecordFile` implementation which stores lots of BlockCompressedRecordFiles in a directory in sequentially numbered segment files.  The writer provides the additional method roll(), which synchronizes the current file and starts a new one for future appends.  RecordLogDirectory uses the top 28 bits of the address for the segment file number, which limits each individual segment file to 4 GB (they can be slightly larger but the last addressable block is at address 2^32).  RecordLogDirectory maintains a fixed size cache of segments addressed by segment number and containing block caches.  The block caches are reference counted to make closing the file handles possible when they are evicted from the cache.
 
+## CompressedBlockRecordFile file format
+```
+record log: [block]*[MAX_INT (int)][metadata][metadata length][total size]
+
+block: [block size (int)][checksum (int)][num records (int)][entry length (vints)]*[entry]*[padding]
+                                         |----------------- compressed -------------------|
+```
+
+## Address scheme
+
+CompressedBlockRecordFile (not written as a RecordLogDirectory):
+```
+[block address: 54 bits][record index: 10 bits]
+```
+
+Address scheme for RecordLogDirectory:
+```
+[segment number: 28 bits][block address: 36 bits][record index: 10 bits]
+```
+
