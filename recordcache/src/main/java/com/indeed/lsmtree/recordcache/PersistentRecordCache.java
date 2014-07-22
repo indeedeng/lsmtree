@@ -20,6 +20,7 @@ import it.unimi.dsi.fastutil.longs.LongArrayList;
 import org.apache.commons.collections.comparators.ComparableComparator;
 import org.apache.log4j.Logger;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
@@ -64,7 +65,7 @@ public final class PersistentRecordCache<K, V> implements RecordCache<K, V> {
     private final Comparator<K> comparator;
 
     /**
-     * Use {@link com.indeed.lsmtree.recordcache.PersistentRecordCache.Builder#build()} to instantiate.
+     * Use {@link com.indeed.lsmtree.recordcache.PersistentRecordCache.Builder#build()} to create instances.
      *
      * @param index                 lsm tree
      * @param recordLogDirectory    record log directory
@@ -165,7 +166,16 @@ public final class PersistentRecordCache<K, V> implements RecordCache<K, V> {
         return index.getFreeSpace();
     }
 
-    public V get(K key, CacheStats cacheStats) {
+    /**
+     * Performs lookup for single key.
+     *
+     * @param key           key to lookup
+     * @param cacheStats    stats
+     * @return              value for lookup key, or null if not found
+     */
+    @Nullable
+    public V get(@Nonnull K key,
+                 @Nonnull CacheStats cacheStats) {
         final Map<K, V> results = getAll(Collections.singleton(key), cacheStats);
         if (results.size() > 0) {
             return results.get(key);
@@ -173,7 +183,16 @@ public final class PersistentRecordCache<K, V> implements RecordCache<K, V> {
         return null;
     }
 
-    public Map<K, V> getAll(Collection<K> keys, CacheStats cacheStats) {
+    /**
+     * Performs batch lookup for multiple keys.
+     *
+     * @param keys          keys to lookup
+     * @param cacheStats    stats
+     * @return              map of found keys to their values
+     */
+    @Nonnull
+    public Map<K, V> getAll(@Nonnull Collection<K> keys,
+                            @Nonnull CacheStats cacheStats) {
         final Map<K, V> results = Maps.newHashMap();
         for (K key : keys) {
             try {
@@ -236,7 +255,20 @@ public final class PersistentRecordCache<K, V> implements RecordCache<K, V> {
         return put;
     }
 
-    public Iterator<Either<Exception, P2<K,V>>> getStreaming(Iterator<K> keys, AtomicInteger progress, AtomicInteger skipped) {
+    /**
+     * Performs lookup for multiple keys and returns a streaming iterator to results.
+     * Each element in the iterator is one of
+     *  (1) an exception associated with a single lookup
+     *  (2) a key value tuple
+     *
+     * @param keys      lookup keys
+     * @param progress  (optional) an AtomicInteger for tracking progress
+     * @param skipped   (optional) an AtomicInteger for tracking missing keys
+     * @return          iterator of lookup results
+     */
+    public Iterator<Either<Exception, P2<K,V>>> getStreaming(final @Nonnull Iterator<K> keys,
+                                                             final @Nullable AtomicInteger progress,
+                                                             final @Nullable AtomicInteger skipped) {
         log.info("starting store lookups");
         LongArrayList addressList = new LongArrayList();
         int notFound = 0;
@@ -383,6 +415,12 @@ public final class PersistentRecordCache<K, V> implements RecordCache<K, V> {
         }
     }
 
+    /**
+     * Repairs index for a record log segment by reindexing the addresses of any corrupted keys.
+     *
+     * @param address               address into a possibly corrupted record log
+     * @throws IndexReadException
+     */
     private void reindex(long address) throws IndexReadException {
         final int segmentNum = recordLogDirectory.getSegmentNum(address);
         try {
@@ -426,16 +464,31 @@ public final class PersistentRecordCache<K, V> implements RecordCache<K, V> {
         repairedSegments.incrementAndGet();
     }
 
+    /**
+     * Update functions to be registered with a {@link RecordLogDirectoryPoller}
+     *
+     * @return callback functions
+     */
     @Override
     public RecordLogDirectoryPoller.Functions getFunctions() {
         return indexUpdateFunctions;
     }
 
+    /**
+     * Close the cache.
+     *
+     * @throws IOException  if an I/O error occurs
+     */
     @Override
     public void close() throws IOException {
         index.close();
     }
 
+    /**
+     * Blocks until compactions are complete.
+     *
+     * @throws InterruptedException
+     */
     public void waitForCompactions() throws InterruptedException {
         index.waitForCompactions();
     }
