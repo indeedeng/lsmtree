@@ -20,9 +20,9 @@
     </licenses>
 
     <scm>
-        <url>https://github.com/indeedeng/lsmtree</url>
-        <connection>scm:git:https://github.com/indeedeng/lsmtree.git</connection>
-        <developerConnection>scm:git:git@github.com:indeedeng/lsmtree.git</developerConnection>
+        <url>https://eng-git.ausoff.indeed.net/opensource/lsmtree</url>
+        <connection>scm:git:git@eng-git.ausoff.indeed.net:opensource/lsmtree.git</connection>
+        <developerConnection>scm:git:git@eng-git.ausoff.indeed.net:opensource/lsmtree.git</developerConnection>
     </scm>
 
     <modules>
