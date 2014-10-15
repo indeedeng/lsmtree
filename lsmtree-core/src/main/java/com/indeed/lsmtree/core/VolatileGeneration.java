@@ -246,7 +246,9 @@ public final class VolatileGeneration<K, V> implements Generation<K,V> {
     }
 
     public void closeWriter() throws IOException {
-        Closeables2.closeQuietly(transactionLog, log);
+        if (transactionLog != null) {
+            transactionLog.close();
+        }
     }
 
     @Override

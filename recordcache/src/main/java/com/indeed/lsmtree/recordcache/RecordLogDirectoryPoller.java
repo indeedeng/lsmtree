@@ -25,8 +25,8 @@ public final class RecordLogDirectoryPoller extends GenericRecordLogDirectoryPol
         this(recordLogDirectory, fileCheckpointer(lastPositionFile), loop);
     }
 
-    public RecordLogDirectoryPoller(final RecordLogDirectory<Operation> recordLogDirectory, final File lastPositionFile, final boolean loop, final boolean gc) throws IOException {
-        this(recordLogDirectory, fileCheckpointer(lastPositionFile), loop, gc);
+    public RecordLogDirectoryPoller(final RecordLogDirectory<Operation> recordLogDirectory, final File lastPositionFile, final boolean loop, final boolean deleteRecordLogs) throws IOException {
+        this(recordLogDirectory, fileCheckpointer(lastPositionFile), loop, deleteRecordLogs);
     }
 
     public RecordLogDirectoryPoller(final RecordLogDirectory<Operation> recordLogDirectory, final Checkpointer<Long> checkpointer) throws IOException {
@@ -41,11 +41,11 @@ public final class RecordLogDirectoryPoller extends GenericRecordLogDirectoryPol
      * @param recordLogDirectory    record log directory
      * @param checkpointer          checkpointer
      * @param loop                  If true, poller will continually poll for new record logs. If false only polls once.
-     * @param gc                    If true, poller will delete record logs up to but excluding the most recently read one.
+     * @param deleteRecordLogs      If true, poller will delete record logs up to but excluding the most recently read one.
      * @throws IOException
      */
-    public RecordLogDirectoryPoller(final RecordLogDirectory<Operation> recordLogDirectory, final Checkpointer<Long> checkpointer, final boolean loop, final boolean gc) throws IOException {
-        super(recordLogDirectory, checkpointer, loop, gc);
+    public RecordLogDirectoryPoller(final RecordLogDirectory<Operation> recordLogDirectory, final Checkpointer<Long> checkpointer, final boolean loop, final boolean deleteRecordLogs) throws IOException {
+        super(recordLogDirectory, checkpointer, loop, deleteRecordLogs);
     }
 
     /**
