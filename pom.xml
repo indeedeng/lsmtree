@@ -3,8 +3,8 @@
 
     <parent>
         <groupId>com.indeed</groupId>
-        <artifactId>proprietary-parent</artifactId>
-        <version>7</version>
+        <artifactId>oss-parent</artifactId>
+        <version>12</version>
     </parent>
 
     <artifactId>lsmtree-parent</artifactId>
@@ -20,9 +20,9 @@
     </licenses>
 
     <scm>
-        <url>https://eng-git.ausoff.indeed.net/opensource/lsmtree</url>
-        <connection>scm:git:git@eng-git.ausoff.indeed.net:opensource/lsmtree.git</connection>
-        <developerConnection>scm:git:git@eng-git.ausoff.indeed.net:opensource/lsmtree.git</developerConnection>
+        <url>https://github.com/indeedeng/lsmtree</url>
+        <connection>scm:git:https://github.com/indeedeng/lsmtree.git</connection>
+        <developerConnection>scm:git:git@github.com:indeedeng/lsmtree.git</developerConnection>
     </scm>
 
     <modules>
