@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.indeed</groupId>
         <artifactId>oss-parent</artifactId>
-        <version>12</version>
+        <version>16</version>
     </parent>
 
     <artifactId>lsmtree-parent</artifactId>
