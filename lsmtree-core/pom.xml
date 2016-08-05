@@ -35,6 +35,10 @@
         </dependency>
         <dependency>
             <groupId>com.indeed</groupId>
+            <artifactId>util-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.indeed</groupId>
             <artifactId>util-mmap</artifactId>
         </dependency>
         <dependency>

@@ -23,9 +23,9 @@ import com.indeed.util.core.io.Closeables2;
 import com.indeed.util.core.reference.SharedReference;
 import com.indeed.util.core.shell.PosixFileOperations;
 import com.indeed.util.io.BufferedFileDataOutputStream;
+import com.indeed.util.mmap.MMapBuffer;
 import com.indeed.util.mmap.Memory;
 import com.indeed.util.mmap.MemoryDataInput;
-import com.indeed.util.mmap.MMapBuffer;
 import com.indeed.util.serialization.LongSerializer;
 import com.indeed.util.serialization.Serializer;
 import it.unimi.dsi.fastutil.chars.CharArrayList;
@@ -41,12 +41,11 @@ import java.io.Closeable;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.Iterator;
 
@@ -70,18 +69,28 @@ public final class ImmutableBTreeIndex {
                 final int blocksize,
                 boolean keepDeletions
         ) throws IOException {
+            write(file.toPath(), iterator, keySerializer, valueSerializer, blocksize, keepDeletions);
+        }
+        public static <K, V> void write(
+                Path path,
+                Iterator<Generation.Entry<K,V>> iterator,
+                Serializer<K> keySerializer,
+                Serializer<V> valueSerializer,
+                final int blocksize,
+                boolean keepDeletions
+        ) throws IOException {
             if (blocksize > 65536) throw new IllegalArgumentException("block size must be less than 65536");
-            file.mkdirs();
-            final BufferedFileDataOutputStream fileOut = new BufferedFileDataOutputStream(new File(file, "index.bin"));
+            Files.createDirectories(path);
+            final BufferedFileDataOutputStream fileOut = new BufferedFileDataOutputStream(path.resolve("index.bin"));
             final CountingOutputStream out = new CountingOutputStream(fileOut);
             //tempFile is deleted in writeIndex
-            final File tempFile = File.createTempFile("tmp", ".bin");
-            final WriteLevelResult result = writeLevel(out, tempFile, iterator, keySerializer, valueSerializer, blocksize, keepDeletions);
+            final Path tempPath = Files.createTempFile("tmp", ".bin");
+            final WriteLevelResult result = writeLevel(out, tempPath, iterator, keySerializer, valueSerializer, blocksize, keepDeletions);
             final int tmpCount = result.tmpCount;
             final long size = result.size;
 
             final long valueLevelLength = out.getCount();
-            final Header header = writeIndex(out, tempFile, tmpCount, keySerializer, blocksize);
+            final Header header = writeIndex(out, tempPath, tmpCount, keySerializer, blocksize);
             header.valueLevelLength = valueLevelLength;
             header.size = size;
             header.hasDeletions = keepDeletions;
@@ -91,43 +100,43 @@ public final class ImmutableBTreeIndex {
         }
 
         private static Header writeIndex(
-                final CountingOutputStream counter, File tempFile, int tmpCount, Serializer keySerializer, int blocksize
+                final CountingOutputStream counter, Path tempPath, int tmpCount, Serializer keySerializer, int blocksize
         ) throws IOException {
             if (tmpCount == 0) {
-                tempFile.delete();
+                Files.delete(tempPath);
                 final Header header = new Header();
                 header.indexLevels = 0;
                 header.rootLevelStartAddress = 0;
                 header.fileLength = Header.length();
                 return header;
             }
-            TempFileIterator tmpIterator = new TempFileIterator(tempFile, tmpCount, keySerializer);
+            TempFileIterator tmpIterator = new TempFileIterator(tempPath, tmpCount, keySerializer);
             int indexLevels = 0;
             final LongSerializer longSerializer = new LongSerializer();
             while (true) {
                 final long levelStart = counter.getCount();
                 indexLevels++;
-                final File nextTempFile = File.createTempFile("tmp", ".bin");
-                final WriteLevelResult result = writeLevel(counter, nextTempFile, tmpIterator, keySerializer, longSerializer, blocksize, false);
+                final Path nextTempPath = Files.createTempFile("tmp", ".bin");
+                final WriteLevelResult result = writeLevel(counter, nextTempPath, tmpIterator, keySerializer, longSerializer, blocksize, false);
                 tmpCount = result.tmpCount;
-                tempFile.delete();
+                Files.delete(tempPath);
                 if (tmpCount <= 1) {
-                    nextTempFile.delete();
+                    Files.delete(nextTempPath);
                     final Header header = new Header();
                     header.indexLevels = indexLevels;
                     header.rootLevelStartAddress = levelStart;
                     header.fileLength = counter.getCount()+Header.length();
                     return header;
                 } else {
-                    tempFile = nextTempFile;
-                    tmpIterator = new TempFileIterator(tempFile, tmpCount, keySerializer);
+                    tempPath = nextTempPath;
+                    tmpIterator = new TempFileIterator(tempPath, tmpCount, keySerializer);
                 }
             }
         }
 
         private static <K,V> WriteLevelResult writeLevel(
                 final CountingOutputStream counter,
-                final File tempFile,
+                final Path tempPath,
                 final Iterator<Generation.Entry<K,V>> iterator,
                 final Serializer<K> keySerializer,
                 final Serializer<V> valueSerializer,
@@ -139,7 +148,7 @@ public final class ImmutableBTreeIndex {
                 return new WriteLevelResult(0, 0);
             }
             next = iterator.next();
-            final LittleEndianDataOutputStream tmpOut = new LittleEndianDataOutputStream(new BufferedOutputStream(new FileOutputStream(tempFile), 131072));
+            final LittleEndianDataOutputStream tmpOut = new LittleEndianDataOutputStream(new BufferedOutputStream(Files.newOutputStream(tempPath), 131072));
             final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             final LittleEndianDataOutputStream bufferDataOutput = new LittleEndianDataOutputStream(buffer);
             final ByteArrayOutputStream currentBlock = new ByteArrayOutputStream(blocksize);
@@ -246,13 +255,13 @@ public final class ImmutableBTreeIndex {
         private int i = 0;
 
         public TempFileIterator(
-                File tempFile,
+                Path tempPath,
                 int tmpCount,
                 Serializer<K> keySerializer
-        ) throws FileNotFoundException {
+        ) throws IOException {
             this.tmpCount = tmpCount;
             this.keySerializer = keySerializer;
-            in = new LittleEndianDataInputStream(new BufferedInputStream(new FileInputStream(tempFile), 131072));
+            in = new LittleEndianDataInputStream(new BufferedInputStream(Files.newInputStream(tempPath), 131072));
         }
 
         @Override
@@ -294,20 +303,28 @@ public final class ImmutableBTreeIndex {
 
         private final long size;
 
-        private final File indexFile;
+        private final Path indexFile;
         
         private final Comparator<K> comparator;
 
         private final SharedReference<Closeable> stuffToClose;
 
         public Reader(File file, Serializer<K> keySerializer, Serializer<V> valueSerializer, final boolean mlockFiles) throws IOException {
-            this(file, new ComparableComparator(), keySerializer, valueSerializer, mlockFiles);
+            this(file.toPath(), keySerializer, valueSerializer, mlockFiles);
+        }
+
+        public Reader(Path path, Serializer<K> keySerializer, Serializer<V> valueSerializer, final boolean mlockFiles) throws IOException {
+            this(path, new ComparableComparator(), keySerializer, valueSerializer, mlockFiles);
         }
 
         public Reader(File file, Comparator<K> comparator, Serializer<K> keySerializer, Serializer<V> valueSerializer, final boolean mlockFiles) throws IOException {
+            this(file.toPath(), comparator, keySerializer, valueSerializer, mlockFiles);
+        }
+
+        public Reader(Path path, Comparator<K> comparator, Serializer<K> keySerializer, Serializer<V> valueSerializer, final boolean mlockFiles) throws IOException {
             this.comparator = comparator;
-            indexFile = new File(file, "index.bin");
-            sizeInBytes = indexFile.length();
+            indexFile = path.resolve("index.bin");
+            sizeInBytes = Files.size(indexFile);
             buffer = new MMapBuffer(indexFile, FileChannel.MapMode.READ_ONLY, ByteOrder.LITTLE_ENDIAN);
             try {
                 stuffToClose = SharedReference.create((Closeable)buffer);
@@ -347,7 +364,7 @@ public final class ImmutableBTreeIndex {
                 if (valueBlock == null) return null;
                 return valueBlock.get(key);
             } catch (InternalError e) {
-                throw new RuntimeException("file "+indexFile.getAbsolutePath()+" length is currently less than MMapBuffer length, it has been modified after open. this is a huge problem.", e);
+                throw new RuntimeException("file "+ indexFile.normalize() +" length is currently less than MMapBuffer length, it has been modified after open. this is a huge problem.", e);
             }
         }
 
@@ -379,7 +396,7 @@ public final class ImmutableBTreeIndex {
                 if (valueBlock == null) return null;
                 return valueBlock.neighbor(key, modifier);
             } catch (InternalError e) {
-                throw new IOException("file "+indexFile.getAbsolutePath()+" length is currently less than MMapBuffer length, it has been modified after open. this is a huge problem.", e);
+                throw new IOException("file "+ indexFile.normalize() +" length is currently less than MMapBuffer length, it has been modified after open. this is a huge problem.", e);
             }
         }
 
@@ -388,7 +405,7 @@ public final class ImmutableBTreeIndex {
                 final Block valueBlock = rootBlock().getFirstValueBlock();
                 return valueBlock.dataBlock.getEntry(0);
             } catch (InternalError e) {
-                throw new IOException("file "+indexFile.getAbsolutePath()+" length is currently less than MMapBuffer length, it has been modified after open. this is a huge problem.", e);
+                throw new IOException("file "+ indexFile.normalize() +" length is currently less than MMapBuffer length, it has been modified after open. this is a huge problem.", e);
             }
         }
 
@@ -397,7 +414,7 @@ public final class ImmutableBTreeIndex {
                 final Block valueBlock = rootBlock().getLastValueBlock();
                 return valueBlock.dataBlock.getEntry(valueBlock.length()-1);
             } catch (InternalError e) {
-                throw new IOException("file "+indexFile.getAbsolutePath()+" length is currently less than MMapBuffer length, it has been modified after open. this is a huge problem.", e);
+                throw new IOException("file "+ indexFile.normalize() +" length is currently less than MMapBuffer length, it has been modified after open. this is a huge problem.", e);
             }
         }
 
@@ -524,19 +541,28 @@ public final class ImmutableBTreeIndex {
             return comparator;
         }
 
+        /**
+         * use {@link #getIndexPath()} instead
+         * @return
+         */
+        @Deprecated
         @Override
         public File getPath() {
+            return indexFile.toFile();
+        }
+
+        public Path getIndexPath() {
             return indexFile;
         }
 
         @Override
         public void checkpoint(File checkpointPath) throws IOException {
-            PosixFileOperations.cplr(indexFile, checkpointPath);
+            PosixFileOperations.cplr(indexFile, checkpointPath.toPath());
         }
 
         @Override
         public void delete() throws IOException {
-            indexFile.delete();
+            Files.delete(indexFile);
         }
 
         public long sizeInBytes() {
