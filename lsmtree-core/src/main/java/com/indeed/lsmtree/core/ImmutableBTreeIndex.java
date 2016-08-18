@@ -61,6 +61,10 @@ public final class ImmutableBTreeIndex {
         //no reason to instantiate this ever
         private Writer() {}
 
+        /**
+         * Use {@link #write(Path, Iterator, Serializer, Serializer, int, boolean)} instead
+         */
+        @Deprecated
         public static <K, V> void write(
                 File file,
                 Iterator<Generation.Entry<K,V>> iterator,
@@ -71,6 +75,7 @@ public final class ImmutableBTreeIndex {
         ) throws IOException {
             write(file.toPath(), iterator, keySerializer, valueSerializer, blocksize, keepDeletions);
         }
+
         public static <K, V> void write(
                 Path path,
                 Iterator<Generation.Entry<K,V>> iterator,
