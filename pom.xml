@@ -83,7 +83,7 @@
 
         <!-- releases of our own projects to use -->
         <!-- these should only be SNAPSHOTs when no release is available -->
-        <indeed-util.version>[1.0.16-SNAPSHOT,)</indeed-util.version>
+        <indeed-util.version>[1.0.22,)</indeed-util.version>
         <google-guava.version>16.0.1</google-guava.version>
         <fastutil.version>6.2.2</fastutil.version>
     </properties>
