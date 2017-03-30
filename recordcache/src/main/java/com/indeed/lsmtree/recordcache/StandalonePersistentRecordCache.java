@@ -46,9 +46,9 @@ import static com.indeed.util.core.Either.Right;
  * This class creates an LSM-tree based cache from recordLog files. We call it "standalone" because
  * it does not need to access the recordLog files after initially loading them.
  *
- * This cache stores the <V> value in the underlying cache directly. This contrasts with
+ * This cache stores the {@link V} value in the underlying cache directly. This contrasts with
  * {@link PersistentRecordCache}, which creates an underlying cache
- * of key -> (segment number of the recordLog file where the value is located) and then looks up the
+ * of key to (segment number of the recordLog file where the value is located) and then looks up the
  * value in the relevant recordLog file using the segment number.
  *
  * NOTE: Since the dataset will occasionally double in size during compaction, this class is only

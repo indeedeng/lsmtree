@@ -40,7 +40,7 @@ public final class RecordLogAppender<K,V> extends GenericRecordLogAppender<Opera
      * @param valueSerializer   value serializer
      * @param keyComparator     key comparator
      * @param codec             compression codec
-     * @throws IOException
+     * @throws IOException      if an I/O error occurs
      */
     public RecordLogAppender(File file, Serializer<K> keySerializer, Serializer<V> valueSerializer, Comparator<K> keyComparator, CompressionCodec codec)
             throws IOException {
@@ -54,7 +54,7 @@ public final class RecordLogAppender<K,V> extends GenericRecordLogAppender<Opera
      * @param keyComparator     key comparator
      * @param codec             compression codec
      * @param metadataRef       atomic reference to a metadata object, if nonnull after construction it will contain a reference to previous flushed metadata if it exists
-     * @throws IOException
+     * @throws IOException      if an I/O error occurs
      */
     public RecordLogAppender(File file, Serializer<K> keySerializer, Serializer<V> valueSerializer, Comparator<K> keyComparator, CompressionCodec codec, AtomicReference<Map<String, String>> metadataRef)
             throws IOException {
@@ -68,7 +68,7 @@ public final class RecordLogAppender<K,V> extends GenericRecordLogAppender<Opera
      * @param keyCollectionSerializer   key collection serializer
      * @param keyComparator             key comparator
      * @param codec                     compression codec
-     * @throws IOException
+     * @throws IOException              if an I/O error occurs
      */
     public RecordLogAppender(File file, Serializer<K> keySerializer, Serializer<V> valueSerializer, Serializer<Collection<K>> keyCollectionSerializer, Comparator<K> keyComparator, CompressionCodec codec) throws IOException {
         this(file, keySerializer, valueSerializer, keyCollectionSerializer, keyComparator, codec, null);
@@ -82,7 +82,7 @@ public final class RecordLogAppender<K,V> extends GenericRecordLogAppender<Opera
      * @param keyComparator             key comparator
      * @param codec                     compression codec
      * @param metadataRef               atomic reference to a metadata object, if nonnull after construction it will contain a reference to previous flushed metadata if it exists
-     * @throws IOException
+     * @throws IOException              if an I/O error occurs
      */
     public RecordLogAppender(File file, Serializer<K> keySerializer, Serializer<V> valueSerializer, Serializer<Collection<K>> keyCollectionSerializer, Comparator<K> keyComparator, CompressionCodec codec, AtomicReference<Map<String, String>> metadataRef) throws IOException {
         super(file, new OperationSerializer<K, V>(keySerializer, valueSerializer, keyCollectionSerializer), codec, metadataRef);
@@ -93,7 +93,7 @@ public final class RecordLogAppender<K,V> extends GenericRecordLogAppender<Opera
      * Marks keys as deleted.
      *
      * @param ids           keys to delete
-     * @throws IOException
+     * @throws IOException  if an I/O error occurs
      */
     @Override
     public void deleteDocs(final Collection<K> ids) throws IOException {
@@ -105,10 +105,10 @@ public final class RecordLogAppender<K,V> extends GenericRecordLogAppender<Opera
     /**
      * Writes a new key/value entry. Can be used to overwrite previous existing values.
      *
-     * @param key       key to write
-     * @param value     value to write
-     * @return          position written
-     * @throws IOException
+     * @param key          key to write
+     * @param value        value to write
+     * @return             position written
+     * @throws IOException if an I/O error occurs
      */
     @Override
     public long write(final K key, final V value) throws IOException {

@@ -131,7 +131,7 @@ public final class Store<K, V> implements Closeable {
      * @param mlockFiles                    mlock files if true
      * @param bloomFilterMemory             memory allocated to bloom filter, in bytes
      * @param mlockBloomFilters             mlock bloom filters if true
-     * @throws IOException
+     * @throws IOException  if an I/O error occurs
      */
     Store(
             File root,
@@ -470,7 +470,7 @@ public final class Store<K, V> implements Closeable {
      * Removes the mapping for a key.
      *
      * @param key           key to delete
-     * @throws IOException
+     * @throws IOException  if an I/O error occurs
      */
     public void delete(K key) throws IOException {
         doUntilSuccessful(delete, key);
@@ -686,7 +686,7 @@ public final class Store<K, V> implements Closeable {
      * @param processor     processor
      * @param <A>           return type
      * @return              value determined by processor
-     * @throws IOException
+     * @throws IOException  if an I/O error occurs
      */
     public <A> A process(Processor<Entry<K,V>, A> processor) throws IOException {
         return doWithState(this.<A>process(), P.p(processor, (K)null, Boolean.FALSE, Boolean.FALSE));
@@ -939,7 +939,6 @@ public final class Store<K, V> implements Closeable {
 
     /**
      * @return              space reserved for compaction, in bytes
-     * @throws IOException
      */
     public long getReservedSpaceUsage() {
         return reservedCompactionSpace.get();
@@ -947,7 +946,7 @@ public final class Store<K, V> implements Closeable {
 
     /**
      * @return              remaining free space in bytes, excluding any space reserved for compaction and the reserved space threshold
-     * @throws IOException
+     * @throws IOException  if an I/O error occurs
      */
     public long getFreeSpace() throws IOException {
         return getFreeSpace(getReservedSpaceUsage() + reservedSpaceThreshold);

@@ -63,6 +63,15 @@ public final class ImmutableBTreeIndex {
 
         /**
          * Use {@link #write(Path, Iterator, Serializer, Serializer, int, boolean)} instead
+         * @param file root lsm tree index directory
+         * @param iterator the iterator
+         * @param keySerializer the key serializer
+         * @param valueSerializer the value serializer
+         * @param blocksize block size
+         * @param keepDeletions true to keep deletion
+         * @param <K> the key type
+         * @param <V> the value type
+         * @throws IOException  if an I/O error occurs
          */
         @Deprecated
         public static <K, V> void write(
@@ -76,6 +85,17 @@ public final class ImmutableBTreeIndex {
             write(file.toPath(), iterator, keySerializer, valueSerializer, blocksize, keepDeletions);
         }
 
+        /**
+         * @param path root lsm tree index directory
+         * @param iterator the iterator
+         * @param keySerializer the key serializer
+         * @param valueSerializer the value serializer
+         * @param blocksize block size
+         * @param keepDeletions true to keep deletion
+         * @param <K> the key type
+         * @param <V> the value type
+         * @throws IOException  if an I/O error occurs
+         */
         public static <K, V> void write(
                 Path path,
                 Iterator<Generation.Entry<K,V>> iterator,

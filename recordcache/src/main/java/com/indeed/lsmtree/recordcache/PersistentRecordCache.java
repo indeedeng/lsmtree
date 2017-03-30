@@ -504,7 +504,7 @@ public final class PersistentRecordCache<K, V> implements RecordCache<K, V> {
     /**
      * Blocks until compactions are complete.
      *
-     * @throws InterruptedException
+     * @throws InterruptedException when interrupted during operation
      */
     public void waitForCompactions() throws InterruptedException {
         index.waitForCompactions();

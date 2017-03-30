@@ -55,7 +55,7 @@ public final class RecordLogDirectoryPoller extends GenericRecordLogDirectoryPol
      * @param checkpointer          checkpointer
      * @param loop                  If true, poller will continually poll for new record logs. If false only polls once.
      * @param deleteRecordLogs      If true, poller will delete record logs up to but excluding the most recently read one.
-     * @throws IOException
+     * @throws IOException          if an I/O error occurs
      */
     public RecordLogDirectoryPoller(final RecordLogDirectory<Operation> recordLogDirectory, final Checkpointer<Long> checkpointer, final boolean loop, final boolean deleteRecordLogs) throws IOException {
         super(recordLogDirectory, checkpointer, loop, deleteRecordLogs);
@@ -68,9 +68,9 @@ public final class RecordLogDirectoryPoller extends GenericRecordLogDirectoryPol
         /**
          * Called once for each operation in a record log.
          *
-         * @param position
-         * @param op
-         * @throws IOException
+         * @param position      the position of the record
+         * @param op            the operation to process
+         * @throws IOException  if an I/O error occurs
          */
         void process(long position, Operation op) throws IOException;
     }
